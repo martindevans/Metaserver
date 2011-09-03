@@ -16,8 +16,7 @@
 #
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
-from google.appengine.ext.webapp import template
-import os
+
 
 class MainHandler(webapp.RequestHandler):
     def get(self):
@@ -28,15 +27,9 @@ class IpHandler(webapp.RequestHandler):
 	self.response.headers["Content-Type"] = "text/plain"
         self.response.out.write(str(self.request.remote_addr))
 
-class NatPinHandler(webapp.RequestHandler):
-    def get(self):
-        path = os.path.join(os.path.dirname(__file__), "django/natpin.html")
-	html = template.render(path, { "port" : self.request.get('port') })
-
-	return html.decode("utf-8")
-
 def main():
-    application = webapp.WSGIApplication([('/', MainHandler),('/whatismyip', IpHandler),('/natpin*', NatPinHandler)],
+    application = webapp.WSGIApplication([('/', MainHandler),
+										  ('/whatismyip', IpHandler)],
                                          debug=True)
     util.run_wsgi_app(application)
 

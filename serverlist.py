@@ -2,6 +2,8 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp import util
 from google.appengine.ext import db
 import uuid
+from datetime import timedelta
+from datetime import datetime
 
 class ServerEntry(db.Model):
 	name = db.StringProperty()
@@ -16,20 +18,20 @@ def FilterEntries(webRequest):
 	
 class ListHandler(webapp.RequestHandler):
     def get(self):
-		self.response.headers["Content-Type"] = "text/plain"
+		self.response.headers["Content-Type"] = "text/xml"
 	
 		w = self.response.out.write
 		w('<serverlist>')
 		if (self.request.get('game') == ''):
 			w('<error>No game defined</error>')
 		else:
-			for e in FilterEntries(self.request):
+			for e in FilterEntries(self.request).order("-modification"):
 				w('<entry name="' + e.name + '" address="' + e.address + '" />')
 		w('</serverlist>')
 
 class CreateHandler(webapp.RequestHandler):
 	def get(self):
-		self.response.headers["Content-Type"] = "text/plain"
+		self.response.headers["Content-Type"] = "text/xml"
 		
 		gameOk = self.request.get('game') is not ''
 		nameOk = self.request.get('name') is not ''
@@ -52,11 +54,11 @@ class CreateHandler(webapp.RequestHandler):
 			dbKey = db.put(entry)
 			w("<db_key>" + str(dbKey) + "</db_key>")
 			w("<secret>" + str(entry.secret) + "</secret>")
-		w('<servercreate>')
+		w('</servercreate>')
 		
 class PingHandler(webapp.RequestHandler):
 	def get(self):
-		self.response.headers["Content-Type"] = "text/plain"
+		self.response.headers["Content-Type"] = "text/xml"
 		
 		secretOk = self.request.get('secret') is not ''
 		
@@ -76,10 +78,21 @@ class PingHandler(webapp.RequestHandler):
 					entry.put()
 		w('</pong>')
 		
+class CleanupHandler(webapp.RequestHandler):
+        def get(self):
+		for e in ServerEntry.all().order("modification"):
+			span = datetime.now() - e.modification
+			if span < timedelta(minutes=10):
+				return
+				
+			e.delete()
+			print(e.name + " ... " + str(e.modification))
+		
 def main():
     application = webapp.WSGIApplication([('/serverlist/list', ListHandler),
 										  ('/serverlist/create', CreateHandler),
-										  ('/serverlist/ping', PingHandler)],
+										  ('/serverlist/ping', PingHandler),
+										  ('/serverlist/cleanup', CleanupHandler)],
                                          debug=True)
     util.run_wsgi_app(application)
 
